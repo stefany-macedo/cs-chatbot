@@ -1,0 +1,143 @@
+{
+  "name": "chatbot-cs",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b499b054-277f-45a2-9cbf-a1eb4d0cdb61",
+      "name": "Receber pergunta",
+      "webhookId": "82ff067c-02bf-44b2-a944-810fc6547bc4"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "196urPyiCuCXhpK4d8lt48MR2uQjg5-FEj_xnIWZxsT8",
+          "mode": "list",
+          "cachedResultName": "Base de Conhecimento - Nola",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/196urPyiCuCXhpK4d8lt48MR2uQjg5-FEj_xnIWZxsT8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/196urPyiCuCXhpK4d8lt48MR2uQjg5-FEj_xnIWZxsT8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b547b895-b36e-4647-8fcf-d00016a473aa",
+      "name": "Buscar base",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8EkM2MHSSdqxkfmQ",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "llama-3.3-70b-versatile",
+          "mode": "list",
+          "cachedResultName": "llama-3.3-70b-versatile"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        112
+      ],
+      "id": "11aa96ca-60c1-4f7a-b77b-fc7dbb1e36a7",
+      "name": "Gerar resposta",
+      "credentials": {
+        "openAiApi": {
+          "id": "AgiBWrgApnfldCQC",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Pergunta do usuário:\n{{ $json.chatInput }}\n\nBase de conhecimento:\n{{ $('Buscar base').all().map(item => \n`Pergunta: ${item.json.Pergunta}\nResposta: ${item.json.Resposta}`\n).join('\\n\\n') }}",
+        "options": {
+          "systemMessage": "Você é um assistente de suporte técnico da Nola.\n\nSeu objetivo é responder dúvidas de clientes de forma clara, objetiva e amigável.\n\nUse apenas as informações fornecidas pela base de conhecimento.\n\nCaso não encontre uma resposta, diga:\n\"Não encontrei essa informação na base de conhecimento. Vou encaminhar seu caso para o time responsável.\"\n\nNunca invente informações.\n\nSempre tente ajudar o cliente da melhor forma possível.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8309df12-e2a6-4d89-871c-e6d0f9ac3a1f",
+      "name": "Responder usuário"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receber pergunta": {
+      "main": [
+        [
+          {
+            "node": "Buscar base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar base": {
+      "main": [
+        [
+          {
+            "node": "Responder usuário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar resposta": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Responder usuário",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6f9776a4-b838-4775-9166-cb79113fadb2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e16bd50e8bf5ee1158f7fefeac4338e3a264d4399a1ef6f96287c7c9edbf750a"
+  },
+  "id": "92HsxnhZ7BHwi3da",
+  "tags": []
+}
